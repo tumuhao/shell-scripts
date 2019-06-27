@@ -1,0 +1,18 @@
+shell if loop:
+if [ -f file ]; then
+   echo "yes yes yes"
+elif [ -z file ]; then
+   echo "yes yes"
+else
+   echo "nonono"
+fi
+
+
+shell read line:
+while read line
+do
+echo $line
+cell = echo $line | cut --d=" " -f1
+library = echo $line | cut --d=" " -f2
+echo ${library}_${cell}
+done <"CellList"
