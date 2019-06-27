@@ -1,15 +1,38 @@
 #!/bin/sh
 
+wa=$PWD
+# check if cds.lib and CellList exist
+if [ ! -f cds.lib ] || [ ! -f CellList ];
+then
+  echo "cds.lib and CellList(contains library and cell) must be provided"
+exit 0
+fi
+
+# create cell's run directory and add cell/lib name
 if [ -f cds.lib ] && [ -f CellList ]; 
 then
+sed -i '/^\s*$/d' CellList
+
 while read line
 do
-array=(`echo $line | tr ' ' ' '` )
-cell=${array[1]}
-library=${array[0]}
-echo ${library}_${cell}
-done <"CellList"
-elif
-echo "cds.lib and CellList(contains library and cell) must be provided"
+  array=(`echo $line | tr ' ' ' '` )
+  cell=${array[1]}
+  library=${array[0]}
+   mkdir ${library}_${cell}
+   sed -e "s/CELL_NAME/$cell/g" -e "s/LIBRARY_NAME/$library/g" <./tmplate/si.env> ${library}_${cell}/si.env
+   sed -e "s/CELL_NAME/$cell/g" -e "s/LIBRARY_NAME/$library/g" <./tmplate/createQRC> ${library}_${cell}/createQRC 
+   sed -e "s/CELL_NAME/$cell/g" -e "s/LIBRARY_NAME/$library/g" <./tmplate/genQRC> ${library}_${cell}/genQRC 
+   sed -e "s/CELL_NAME/$cell/g" -e "s/LIBRARY_NAME/$library/g" <./tmplate/lvs_config.rul> ${library}_${cell}/lvs_config.rul 
+   sed -e "s/CELL_NAME/$cell/g" -e "s/LIBRARY_NAME/$library/g" <./tmplate/lvs_technology.rul> ${library}_${cell}/lvs_technology.rul 
+   sed -e "s/CELL_NAME/$cell/g" -e "s/LIBRARY_NAME/$library/g" <./tmplate/pvslvsctl> ${library}_${cell}/pvslvsctl 
+   sed -e "s/CELL_NAME/$cell/g" -e "s/LIBRARY_NAME/$library/g" <./tmplate/qrc.ccl> ${library}_${cell}/qrc.ccl 
+   sed -e "s/CELL_NAME/$cell/g" -e "s/LIBRARY_NAME/$library/g" <./tmplate/strmOut.tpl> ${library}_${cell}/strmOut.tpl
+
+# go into the cell's run directory and run qrc_extraction, and then go back to upper folder
+
+  cd  $wa/${library}_${cell};  bash genQRC; cd $wa; 
+
+#  
+  done <"CellList"
 
 fi
