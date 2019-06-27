@@ -1,18 +1,15 @@
-shell if loop:
-if [ -f file ]; then
-   echo "yes yes yes"
-elif [ -z file ]; then
-   echo "yes yes"
-else
-   echo "nonono"
-fi
+#!/bin/sh
 
-
-shell read line:
+if [ -f cds.lib ] && [ -f CellList ]; 
+then
 while read line
 do
-echo $line
-cell = echo $line | cut --d=" " -f1
-library = echo $line | cut --d=" " -f2
+array=(`echo $line | tr ' ' ' '` )
+cell=${array[1]}
+library=${array[0]}
 echo ${library}_${cell}
 done <"CellList"
+elif
+echo "cds.lib and CellList(contains library and cell) must be provided"
+
+fi
