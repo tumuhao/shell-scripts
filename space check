@@ -1,0 +1,73 @@
+#!/bin/bash
+
+TIMESTAMP=$(date +%Y-%m-%d)
+#LOG=/rscratch/general/${USER}/${TIMESTAMP}.log
+selfcheck=/rscratch/general/space.check.logs/self_check.log
+
+#echo "============================================================================" >>${selfcheck}
+#echo "Start reviewing at `date`." >>${selfcheck}
+
+#function reviewDirs(){
+#     dirname=$1
+#     dirsizeM=`du -m --max-depth=0 $dirname | awk '{ print $1 }'`
+#     dirsizeG=`echo "scale=1; $dirsizeM/1024" | bc`
+#     if awk 'BEGIN{exit ARGV[1]>ARGV[2]}' "5.0" "$dirsizeG"
+#     if [ expr $dirsizeM \> 500 ]
+#     then
+#       echo "$dirname is too big!! it is $dirsizeG M" >>${LOG}         #    echo "$dirname is too big!! it is $dirsizeM M"
+#     else
+#       echo "$dirname size is $dirsizeG G"  >>${LOG}                  #    echo "$dirname size is $dirsize1M M"
+#       echo "==========================="  >>${LOG}
+#     fi
+#}
+
+function reviewFiles(){
+     dirname=$1
+     corefilelist=$(ls $dirname | grep 'core.')
+     for corefilename_pre in $corefilelist
+     do
+         corefilename=`echo $corefilename_pre | sed -e 's/[ \t]*//g'`
+         echo "remove $corefilename"
+         rm $dirname"/"$corefilename
+     done
+  
+     for filename in `find ${dirname} -type f -size +1000M`
+     do
+       filesizeM=`du -m --max-depth=0 $filename | awk '{ print $1 }'`
+       echo "$TIMESTAMP: $filename under $dirname of user $USER is too big!! it is $filesizeM M, that is strange" >>${selfcheck}         
+     done
+}
+
+function reviewRST(){
+     dirname=$1
+     reviewFiles $dirname
+     dirsizeM=`du -m --max-depth=0 $dirname | awk '{ print $1 }'`
+     dirsizeG=`echo "scale=1; $dirsizeM/1024" | bc`
+#     if (( $(echo "$filesizeG > $compare" | bc -l) ));
+     if awk 'BEGIN{exit ARGV[1]>ARGV[2]}' "1000.0" "$dirsizeG"
+     then
+       echo "$TIMESTAMP: $dirname of $USER is too big!! it is $dirsizeG G" >>${selfcheck}         
+     fi
+}
+
+function reviewSOS(){
+     dirname=$1
+     reviewFiles $dirname
+     dirsizeM=`du -m --max-depth=0 $dirname | awk '{ print $1 }'`
+     dirsizeG=`echo "scale=1; $dirsizeM/1024" | bc`
+#     if [ $(echo "$filesizeG > 10" | bc -l) ]
+     if awk 'BEGIN{exit ARGV[1]>ARGV[2]}' "10.0" "$dirsizeG"
+     then
+       echo "$TIMESTAMP: $dirname of $USER is too big!! it is $dirsizeG G" >>${selfcheck}         
+     fi
+}
+
+
+
+RST=/rscratch/general/${USER}
+SOS=/projects/SMIC14SFP_TORRENT/work/${USER}/soswa
+reviewRST ${RST}
+reviewSOS ${SOS}
+
+#echo "Stop reviewing at `date`." >>${selfcheck} 
+#echo "============================================================================" >>${selfcheck}
