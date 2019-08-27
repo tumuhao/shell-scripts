@@ -14,10 +14,14 @@ path41=/rscratch/general/fjdu/cases/dfii/SCC14NSFP_90SDB_9TC20_LVT/
 path51=/rscratch/general/fjdu/cases/dfii/SCC14NSFP_90SDB_9TC20_RVT/
 path61=/rscratch/general/fjdu/cases/dfii/SCC14NSFP_90SDB_9TC20_ULVT/
 
-for cell in $(ls $path1)
+for file in $(ls $path1)
 do
-if [[ $cell =~ ^TD-[A-Z][A-Z][0-9][0-9]-KA ]]; then
-  echo "PDK $cell"
+if [[ $file =~ ^TD-[A-Z][A-Z][0-9][0-9]-KA ]]; then
+  proj="$(cut -d'/' -f4 <<<"$path1")"
+  echo "PDK $file"
+  echo "mkdir -p /process/smicN14/sfp_rf/PDK/incoming"
+  echo "mv $file /process/smicN14/$proj/PDK/incoming"
+  echo "PDK $file"
 elif  [[ $cell =~ ^TD-[A-Z][A-Z][0-9][0-9]-DR ]]; then
   echo "DRM $cell"
 elif [[ $cell =~ ^TD-[A-Z][A-Z][0-9][0-9]-SP ]]; then
