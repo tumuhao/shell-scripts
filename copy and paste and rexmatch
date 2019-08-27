@@ -1,0 +1,69 @@
+#!/usr/bin/sh
+path1=/process/smicN14/sfp_rf/backups/tmp/
+path2=/process/smicN14/sfp/stdcell/9TC_v1p0a/SCC14NSFP_90SDB_9TC16_RVT_v1p0a/Cdn_symbol/scc14nsfp_90sdb_9tc16_rvt_oa/
+path3=/process/smicN14/sfp/stdcell/9TC_v1p0a/SCC14NSFP_90SDB_9TC16_ULVT_v1p0a/Cdn_symbol/scc14nsfp_90sdb_9tc16_ulvt_oa/
+path4=/process/smicN14/sfp/stdcell/9TC_v1p0a/SCC14NSFP_90SDB_9TC20_LVT_v1p0a/Cdn_symbol/scc14nsfp_90sdb_9tc20_lvt_oa/
+path5=/process/smicN14/sfp/stdcell/9TC_v1p0a/SCC14NSFP_90SDB_9TC20_RVT_v1p0a/Cdn_symbol/scc14nsfp_90sdb_9tc20_rvt_oa/
+path6=/process/smicN14/sfp/stdcell/9TC_v1p0a/SCC14NSFP_90SDB_9TC20_ULVT_v1p0a/Cdn_symbol/scc14nsfp_90sdb_9tc20_ulvt_oa/
+
+
+path11=/rscratch/general/fjdu/cases/dfii/SCC14NSFP_90SDB_9TC16_LVT/
+path21=/rscratch/general/fjdu/cases/dfii/SCC14NSFP_90SDB_9TC16_RVT/
+path31=/rscratch/general/fjdu/cases/dfii/SCC14NSFP_90SDB_9TC16_ULVT/
+path41=/rscratch/general/fjdu/cases/dfii/SCC14NSFP_90SDB_9TC20_LVT/
+path51=/rscratch/general/fjdu/cases/dfii/SCC14NSFP_90SDB_9TC20_RVT/
+path61=/rscratch/general/fjdu/cases/dfii/SCC14NSFP_90SDB_9TC20_ULVT/
+
+for cell in $(ls $path1)
+do
+if [[ $cell =~ ^TD-[A-Z][A-Z][0-9][0-9]-KA ]]; then
+  echo "PDK $cell"
+elif  [[ $cell =~ ^TD-[A-Z][A-Z][0-9][0-9]-DR ]]; then
+  echo "DRM $cell"
+elif [[ $cell =~ ^TD-[A-Z][A-Z][0-9][0-9]-SP ]]; then
+  echo "Model $cell"
+elif  [[ $cell =~ ^TD-[A-Z][A-Z][0-9][0-9]-LP ]]; then
+  echo "LVS $cell"
+elif  [[ $cell =~ ^TD-[A-Z][A-Z][0-9][0-9]-TF ]]; then
+  echo "Techfile $cell"
+elif [[ $cell =~ ^TD-[A-Z][A-Z][0-9][0-9]-XQ ]]; then
+  echo "QRC $cell"
+elif  [[ $cell =~ ^TD-[A-Z][A-Z][0-9][0-9]-RM ]]; then
+  echo "MM model $cell"
+fi
+done
+
+#for cell in $(ls $path1)
+#do
+# 
+#  cp -rf $path2$cell/* $path21/$cell
+# 
+#done
+#
+#for cell in $(ls $path3)
+#do
+# 
+#  cp -rf $path3$cell/* $path31/$cell
+# 
+#done
+#
+#for cell in $(ls $path4)
+#do
+# 
+#  cp -rf $path4$cell/* $path41/$cell
+# 
+#done
+#
+#for cell in $(ls $path5)
+#do
+# 
+#  cp -rf $path5$cell/* $path51/$cell
+# 
+#done
+#
+#for cell in $(ls $path6)
+#do
+# 
+#  cp -rf $path6$cell/* $path61/$cell
+# 
+#done
