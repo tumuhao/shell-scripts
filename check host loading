@@ -1,0 +1,39 @@
+#!/bin/sh
+
+TIMESTAMP=$(date +%Y-%m-%d)
+hosts_log=/rscratch/general/server_checks/server_check.log
+queues=`bqueues -l ${queue} | grep "HOSTS" | grep -v "TEMP" | grep -v "temp" |awk -F "[/| ]" '{print $3}'`
+queues_name=`bqueues -l ${queue} | grep "QUEUE" | grep -v "TEMP" |  grep -v "temp" |awk -F "[/| ]" '{print $2}'`
+
+date >>$hosts_log
+for queue in ${queues[@]}
+do
+	ut_to=0
+	swp_to=0
+	mem_to=0
+	num=0
+	
+	hostnames=`bhosts ${queue} | grep [0-9][0-9] | cut -d " " -f1`
+	echo "${queue}		UT	SWP	MEM"  >>$hosts_log
+	for hostname in ${hostnames}
+	do
+		ut=`lsload | grep ${hostname} | awk -F " " '{print $6}' | cut -d '%' -f1`
+		swp=`lsload | grep ${hostname} | awk -F " " '{print $11}' | cut -d 'G' -f1`
+		mem=`lsload | grep ${hostname} | awk -F " " '{print $12}' | cut -d 'G' -f1`
+		#ut_to=`expr $ut_to + $ut`
+		#swp_to=`expr $swp_to + $swp`
+		#mem_to=`expr $mem_to + $mem`
+		#ut_to=$(($ut_to + $ut))
+		#swp_to=$(($swp_to + $swp))
+		#mem_to=$(($mem_to + $mem))
+
+		ut_to=`echo "$ut_to + $ut" | bc`
+		swp_to=`echo "$swp_to + $swp" | bc`
+		mem_to=`echo "$mem_to + $mem" | bc`
+		num=`expr $num + 1`
+		lsload | grep ${hostname} | awk -F " " '{print $1 "	" $6 "	" $11 "	" $12}' >>$hosts_log
+ 	done
+	echo "average		"`echo "$ut_to/$num" | bc`"%	" `echo "$swp_to/$num" | bc`"G	" `echo "$mem_to/$num" | bc`"G" >>$hosts_log
+	echo ""  >>$hosts_log
+	echo "" >>$hosts_log
+done
