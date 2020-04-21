@@ -1,0 +1,7 @@
+if [[ $lib =~ logic ]] || [[ $lib =~ esd ]];then
+for cells0 in $(find "$PATH/$LIB" -type d -maxdepth 1 -mindepth 1)
+do
+  IFS='/' read -r -a array <<< "$cells0"
+  cell=${array[-1]}
+done
+fi
