@@ -1,0 +1,45 @@
+#!/usr/bin/sh
+
+### get all the projects
+allprojects=$(awk '{if($0 !~ /#/) print $1}' /home/cm_admin/sos_servers/sosServerList.map)
+allprojects=(${allprojects[@]} "rscratch") #echo ${allprojects[@]}
+date=$(date +"%m_%d_%H:%M")
+date_del=$(date +"%m_%d")
+rm /tmp/$date_del*.log
+echo "rm /tmp/$date_del*.log"
+
+for fld in ${allprojects[@]}
+do
+	workfolder="/projects/$fld/ds_libs"
+	#if [ -d $workfolder ];then
+		ls /projects/$fld >/dev/null 2>&1
+		#cd /projects/$fld/ds_libs
+		#percent = /grid/common/bin/df -h 2>&1 | grep $fld | awk '{print $6 " " $5 }' | awk -F '%' '{print $1}'
+		#/grid/common/bin/df -h 2>&1 | grep $fld | awk '{print $6 " " $5 }'
+		#percent=$(/grid/common/bin/df -h 2>&1 | grep $fld | awk '{print $6 " " $5 }' | awk '{print $2}')
+		/grid/common/bin/df -h 2>&1 | grep $fld | awk '{print $6 " " $5 }' | awk -F '%' '{print $1}'| tee -a /tmp/$date.spacecheck.log 
+		#>/dev/null 2>&1
+	#fi
+done
+
+
+
+
+statsfile="/tmp/$date.spacecheck.log"
+cat $statsfile | while read line
+do
+	percent=$(echo $line | awk '{print $2}')
+	project=$(echo $line | awk '{print $1}')
+	#echo $project
+	if [[ $percent -gt 89 ]];then
+		if [[ -d $project/work ]];then
+			#echo "python /proj/kdteng1/apdk/common_scripts/space_check/v1/space_check.py $project/work"
+			python /proj/kdteng1/apdk/common_scripts/space_check/v1/space_check.py $project/work
+		elif [[ $project =~ 'rscratch' ]];then
+			#echo "python /proj/kdteng1/apdk/common_scripts/space_check/v1/space_check.py $project"
+			python /proj/kdteng1/apdk/common_scripts/space_check/v1/space_check.py $project
+		fi
+	fi
+
+
+done
