@@ -1,0 +1,26 @@
+#!/usr/bin/sh
+
+### set the checkfolder
+checkfolder="/projects/sd0105_t22ulp/ds_libs"
+flds=$(find $checkfolder -mindepth 1 -maxdepth 1 -type d)
+#echo ${flds[@]}
+
+for fld in ${flds[@]}
+do
+	linklist=$(find $fld -type l)
+	linklistdir=()
+	linklistname=()
+	filename=()
+	for links in ${linklist[@]}
+	do
+		#echo $links
+		tmp1=$(dirname $links)
+		tmp2=$(basename $links)
+		tmp3=$(readlink $links)
+		#linklistdir=(${linklistdir[@]} $tmp1)
+		#linklistname=(${linklistname[@]} $tmp2)
+		#filename=(${filename[@]} $tmp3)
+		echo "cd $(dirname $links); ln -sfn $(readlink $links) $(basename $links)"  | tee -a /tmp/cmd.$(basename $fld)
+	done
+done 
+
