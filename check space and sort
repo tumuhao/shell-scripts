@@ -1,0 +1,62 @@
+#!/usr/bin/sh
+
+### get all the projects
+allprojects=$(awk '{if($0 !~ /#/) print $1}' /home/cm_admin/sos_servers/sosServerList.map)
+### add /rscratch folder
+allprojects=(${allprojects[@]} "rscratch") #echo ${allprojects[@]}
+### handle /tmp logs
+date=$(date +"%m_%d_%H:%M")
+date_del=$(date +"%m_%d")
+rm /tmp/$date_del*.log  >/dev/null 2>&1 
+#echo "rm /tmp/$date_del*.log"
+
+### loop projects folders
+for fld in ${allprojects[@]}
+do
+	workfolder="/projects/$fld/ds_libs"
+	#if [ -d $workfolder ];then
+		ls /projects/$fld >/dev/null 2>&1
+		/grid/common/bin/df -h 2>&1 | grep $fld | grep -v fe | grep -v pd | awk '{print $6 " " $5 }' | awk -F '%' '{print $1}'| tee -a /tmp/$date.spacecheck.log >/dev/null 2>&1
+	#fi
+done
+
+
+###
+function sub_check(){
+	rm /tmp/tmp.space*  >/dev/null 2>&1 
+	if [[ -d $1/work ]];then
+		all_folders=$(find $1/work -mindepth 1 -maxdepth 1 -type d)
+		tmplog="/tmp/tmp.space.$(basename $1).log"
+	elif [[ $project =~ 'rscratch' ]];then
+		all_folders=$(find $1 -mindepth 1 -maxdepth 1 -type d)
+		tmplog="/tmp/tmp.space.rscratch.log"
+	fi
+	#echo $all_folders
+	a=$(date +%H%M%S)
+	for dir in ${all_folders[@]}
+	do {
+		#echo $dir
+		#echo "du -sh $dir | grep [0-9]G | tee -a $tmplog"
+		#bsub -q layout_batch xterm -T \"$dir\" -hold -e 
+		du -sh $dir | grep [0-9]G | tee -a $tmplog
+	}& # 将命令在后台执行，命令范围用{}包围
+	done
+	# 等待当前脚本进程下的子进程结束
+	wait
+	if [[ -e $tmplog ]];then
+		#echo "sort -k2,2n $tmplog | tee /rscratch/general/space.check.logs/$(date +"%m_%d_%H:%M").$(basename $1).log"
+		sort -n -k 1,1 $tmplog | tac | tee /rscratch/general/space.check.logs/$(date +"%m_%d_%H:%M").$(basename $1).log
+	fi
+}
+###
+
+statsfile="/tmp/$date.spacecheck.log"
+cat $statsfile | while read line
+do
+	percent=$(echo $line | awk '{print $2}')
+	project=$(echo $line | awk '{print $1}')
+	#echo $project
+	if [[ $percent -gt 89 ]];then
+		sub_check $project
+	fi
+done
